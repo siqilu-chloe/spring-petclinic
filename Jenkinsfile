@@ -1,31 +1,15 @@
-node {
-
-    stage('Initialize')
-    {
-        def dockerHome = tool 'MyDocker'
-        def mavenHome  = tool 'MyMaven'
-        env.PATH = "${dockerHome}/bin:${mavenHome}/bin:${env.PATH}"
-    }
-
-    stage('Checkout') 
-    {
-        checkout scm
-    }
-
-      stage('Build') 
-           {
-            sh 'uname -a'
-            sh 'mvn -B -DskipTests clean package'  
-          }
-
-        stage('Test') 
-        {
-            //sh 'mvn test'
-            sh 'ifconfig' 
+pipeline {
+    agent {
+        docker {
+            image 'maven:3-alpine' 
+            args '-v /root/.m2:/root/.m2' 
         }
-
-        stage('Deliver') 
-          {
-                sh 'bash ./jenkins/deliver.sh'
+    }
+    stages {
+        stage('Build') { 
+            steps {
+                sh 'mvn install -DskipTests -Dcheckstyle.skip'
+            }
         }
+    }
 }
